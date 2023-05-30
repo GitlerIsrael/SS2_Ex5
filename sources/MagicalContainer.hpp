@@ -31,6 +31,10 @@ namespace ariel {
 
             ~AscendingIterator();
 
+            AscendingIterator(AscendingIterator&& other) = default;
+
+            AscendingIterator& operator=(AscendingIterator&& other) = default;
+
             AscendingIterator &operator=(const AscendingIterator &other);
 
             AscendingIterator &operator++();
@@ -63,6 +67,10 @@ namespace ariel {
 
             ~SideCrossIterator();
 
+            SideCrossIterator(SideCrossIterator&& other) = default;
+
+            SideCrossIterator& operator=(SideCrossIterator&& other) = default;
+
             SideCrossIterator &operator=(const SideCrossIterator &other);
 
             SideCrossIterator &operator++();
@@ -92,6 +100,10 @@ namespace ariel {
             PrimeIterator(const PrimeIterator &other);
 
             ~PrimeIterator();
+
+            PrimeIterator(PrimeIterator&& other) = default;
+
+            PrimeIterator& operator=(PrimeIterator&& other) = default;
 
             bool check_prime(int n);
 
