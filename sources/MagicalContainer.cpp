@@ -10,25 +10,24 @@ using namespace std;
 namespace ariel {
     MagicalContainer::MagicalContainer() {}
 
-    MagicalContainer::~MagicalContainer() {
-        for (int* ptr : prime_elements) {
-            delete ptr;
+
+    void MagicalContainer::addElement(const int& element) {
+        auto it = std::find(elements.begin(), elements.end(), element);
+        if (it != elements.end()) {
+            throw std::runtime_error("Can't add duplicate elements.");
+        } else {
+            auto it = std::lower_bound(elements.begin(), elements.end(), element);
+            elements.insert(it, element);
+
+            if (check_prime(element)) {
+                auto it_prime = std::lower_bound(prime_elements.begin(), prime_elements.end(), &element,
+                                                 [](const int *a, const int *b) {
+                                                     return *a < *b;
+                                                 });
+                prime_elements.insert(it_prime, &element);
+            }
         }
     }
-
-    void MagicalContainer::addElement(int element) {
-        auto it = std::lower_bound(elements.begin(), elements.end(), element);
-        elements.insert(it, element);
-
-        if(check_prime(element)){
-            int* ptr = new int(element);
-            auto it = std::lower_bound(prime_elements.begin(), prime_elements.end(), ptr, [](int* a, int* b) {
-                return *a < *b;
-            });
-            prime_elements.insert(it, ptr);
-        }
-    }
-
 
     void MagicalContainer::removeElement(int element) {
         auto it = std::find(elements.begin(), elements.end(), element);
@@ -38,7 +37,6 @@ namespace ariel {
             throw std::runtime_error("Element not exist");
         }
     }
-
 
     int MagicalContainer::size() const {
         return elements.size();
@@ -63,16 +61,16 @@ namespace ariel {
         return true;
     }
 
-    // Ascending Iterator
+    // Iterator
 
-    MagicalContainer::AscendingIterator::AscendingIterator(const MagicalContainer &container) : container(&container), currentIndex(0) {}
+    MagicalContainer::Iterator::Iterator(const MagicalContainer &container) : container(&container), currentIndex(0) {}
 
-    MagicalContainer::AscendingIterator::AscendingIterator(const AscendingIterator &other) : container(other.container), currentIndex(other.currentIndex) {}
+    MagicalContainer::Iterator::Iterator(const Iterator &other) : container(other.container), currentIndex(other.currentIndex) {}
 
-    MagicalContainer::AscendingIterator::~AscendingIterator() {}
+    MagicalContainer::Iterator::~Iterator() {}
 
-    MagicalContainer::AscendingIterator &
-    MagicalContainer::AscendingIterator::operator=(const AscendingIterator &other) {
+    MagicalContainer::Iterator &
+    MagicalContainer::Iterator::operator=(const Iterator &other) {
         if(&container != &other.container) {throw std::runtime_error("Not valid operation - different containers.");}
         if (this != &other) {
             container = other.container;
@@ -81,41 +79,95 @@ namespace ariel {
         return *this;
     }
 
-    MagicalContainer::AscendingIterator &MagicalContainer::AscendingIterator::operator++() {
+    MagicalContainer::Iterator &MagicalContainer::Iterator::operator++() {
         if(currentIndex == container->size()) {throw std::runtime_error("Can't increment after end.");}
         ++currentIndex;
         return *this;
     }
 
-    int MagicalContainer::AscendingIterator::operator*() const {
+    int MagicalContainer::Iterator::operator*() const {
         return container->elements.at(currentIndex);
     }
 
-    bool MagicalContainer::AscendingIterator::operator==(const AscendingIterator &other) const {
+    bool MagicalContainer::Iterator::operator==(const Iterator &other) const {
         return currentIndex == other.currentIndex;
     }
 
-    bool MagicalContainer::AscendingIterator::operator!=(const AscendingIterator &other) const {
+    bool MagicalContainer::Iterator::operator!=(const Iterator &other) const {
         return !(*this == other);
     }
 
-    bool MagicalContainer::AscendingIterator::operator<(const AscendingIterator &other) const {
+    bool MagicalContainer::Iterator::operator<(const Iterator &other) const {
         return currentIndex < other.currentIndex;
     }
 
-    bool MagicalContainer::AscendingIterator::operator>(const AscendingIterator &other) const {
+    bool MagicalContainer::Iterator::operator>(const Iterator &other) const {
         return currentIndex > other.currentIndex;
     }
 
-    MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::begin() {
-        return AscendingIterator(*container);
+    MagicalContainer::Iterator MagicalContainer::Iterator::begin() {
+        return Iterator(*container);
     }
 
-    MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::end() {
-        AscendingIterator iter(*container);
+    MagicalContainer::Iterator MagicalContainer::Iterator::end() {
+        Iterator iter(*container);
         iter.currentIndex = container->elements.size();
         return iter;
     }
+
+    // Ascending Iterator
+
+    MagicalContainer::AscendingIterator::AscendingIterator(const MagicalContainer &container) : Iterator(container) {}
+
+    MagicalContainer::AscendingIterator::AscendingIterator(const AscendingIterator &other) : Iterator(other) {}
+//
+//    MagicalContainer::AscendingIterator::~AscendingIterator() {}
+//
+//    MagicalContainer::AscendingIterator &
+//    MagicalContainer::AscendingIterator::operator=(const AscendingIterator &other) {
+//        if(&container != &other.container) {throw std::runtime_error("Not valid operation - different containers.");}
+//        if (this != &other) {
+//            container = other.container;
+//            currentIndex = other.currentIndex;
+//        }
+//        return *this;
+//    }
+//
+//    MagicalContainer::AscendingIterator &MagicalContainer::AscendingIterator::operator++() {
+//        if(currentIndex == container->size()) {throw std::runtime_error("Can't increment after end.");}
+//        ++currentIndex;
+//        return *this;
+//    }
+//
+//    int MagicalContainer::AscendingIterator::operator*() const {
+//        return container->elements.at(currentIndex);
+//    }
+//
+//    bool MagicalContainer::AscendingIterator::operator==(const AscendingIterator &other) const {
+//        return currentIndex == other.currentIndex;
+//    }
+//
+//    bool MagicalContainer::AscendingIterator::operator!=(const AscendingIterator &other) const {
+//        return !(*this == other);
+//    }
+//
+//    bool MagicalContainer::AscendingIterator::operator<(const AscendingIterator &other) const {
+//        return currentIndex < other.currentIndex;
+//    }
+//
+//    bool MagicalContainer::AscendingIterator::operator>(const AscendingIterator &other) const {
+//        return currentIndex > other.currentIndex;
+//    }
+//
+//    MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::begin() {
+//        return AscendingIterator(*container);
+//    }
+//
+//    MagicalContainer::AscendingIterator MagicalContainer::AscendingIterator::end() {
+//        AscendingIterator iter(*container);
+//        iter.currentIndex = container->elements.size();
+//        return iter;
+//    }
 
     // SideCross Iterator
 
