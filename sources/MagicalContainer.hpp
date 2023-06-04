@@ -9,15 +9,30 @@ namespace ariel {
     class MagicalContainer {
     private:
         vector<int> elements;
+        vector<int*> prime_elements;
 
     public:
         MagicalContainer();
+
+        ~MagicalContainer();
+
+        // for tidy-
+        MagicalContainer(const MagicalContainer&) = default;
+        MagicalContainer& operator=(const MagicalContainer&) = default;
+        MagicalContainer(MagicalContainer&&) = default;
+        MagicalContainer& operator=(MagicalContainer&&)  = default;
+        //
 
         void addElement(int element);
 
         void removeElement(int element);
 
         int size() const;
+
+        int PrimeSize() const;
+
+        bool check_prime(int n);
+
 
         class AscendingIterator {
         private:
@@ -31,9 +46,11 @@ namespace ariel {
 
             ~AscendingIterator();
 
+            //for tidy-
             AscendingIterator(AscendingIterator&& other) = default;
 
             AscendingIterator& operator=(AscendingIterator&& other) = default;
+            //
 
             AscendingIterator &operator=(const AscendingIterator &other);
 
@@ -67,9 +84,11 @@ namespace ariel {
 
             ~SideCrossIterator();
 
+            //for tidy-
             SideCrossIterator(SideCrossIterator&& other) = default;
 
             SideCrossIterator& operator=(SideCrossIterator&& other) = default;
+            //
 
             SideCrossIterator &operator=(const SideCrossIterator &other);
 
@@ -101,11 +120,11 @@ namespace ariel {
 
             ~PrimeIterator();
 
+            //for tidy-
             PrimeIterator(PrimeIterator&& other) = default;
 
             PrimeIterator& operator=(PrimeIterator&& other) = default;
-
-            bool check_prime(int n);
+            //
 
             PrimeIterator &operator=(const PrimeIterator &other);
 
@@ -125,8 +144,6 @@ namespace ariel {
 
             PrimeIterator end();
         };
-
-
     };
 
 }

@@ -10,9 +10,23 @@ using namespace std;
 namespace ariel {
     MagicalContainer::MagicalContainer() {}
 
+    MagicalContainer::~MagicalContainer() {
+        for (int* ptr : prime_elements) {
+            delete ptr;
+        }
+    }
+
     void MagicalContainer::addElement(int element) {
         auto it = std::lower_bound(elements.begin(), elements.end(), element);
         elements.insert(it, element);
+
+        if(check_prime(element)){
+            int* ptr = new int(element);
+            auto it = std::lower_bound(prime_elements.begin(), prime_elements.end(), ptr, [](int* a, int* b) {
+                return *a < *b;
+            });
+            prime_elements.insert(it, ptr);
+        }
     }
 
 
@@ -30,6 +44,25 @@ namespace ariel {
         return elements.size();
     }
 
+    int MagicalContainer::PrimeSize() const {
+        return prime_elements.size();
+    }
+
+    bool MagicalContainer::check_prime(int n) {
+        if (n < 2) {
+            return false;
+        }
+
+        int sqrtn = static_cast<int>(std::sqrt(n));
+        for (int i = 2; i <= sqrtn; ++i) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // Ascending Iterator
 
     MagicalContainer::AscendingIterator::AscendingIterator(const MagicalContainer &container) : container(&container), currentIndex(0) {}
@@ -40,6 +73,7 @@ namespace ariel {
 
     MagicalContainer::AscendingIterator &
     MagicalContainer::AscendingIterator::operator=(const AscendingIterator &other) {
+        if(&container != &other.container) {throw std::runtime_error("Not valid operation - different containers.");}
         if (this != &other) {
             container = other.container;
             currentIndex = other.currentIndex;
@@ -48,6 +82,7 @@ namespace ariel {
     }
 
     MagicalContainer::AscendingIterator &MagicalContainer::AscendingIterator::operator++() {
+        if(currentIndex == container->size()) {throw std::runtime_error("Can't increment after end.");}
         ++currentIndex;
         return *this;
     }
@@ -92,6 +127,7 @@ namespace ariel {
 
     MagicalContainer::SideCrossIterator &
     MagicalContainer::SideCrossIterator::operator=(const SideCrossIterator &other) {
+        if(&container != &other.container) {throw std::runtime_error("Not valid operation - different containers.");}
         if (this != &other) {
             container = other.container;
             currentIndex = other.currentIndex;
@@ -100,6 +136,7 @@ namespace ariel {
     }
 
     MagicalContainer::SideCrossIterator &MagicalContainer::SideCrossIterator::operator++() {
+        if(currentIndex == container->size()) {throw std::runtime_error("Can't increment after end.");}
         if(currentIndex == container->elements.size() / 2){
             currentIndex = container->elements.size();
         }
@@ -151,22 +188,8 @@ namespace ariel {
 
     MagicalContainer::PrimeIterator::~PrimeIterator() {}
 
-    bool MagicalContainer::PrimeIterator::check_prime(int n) {
-        if (n < 2) {
-            return false;
-        }
-
-        int sqrtn = static_cast<int>(std::sqrt(n));
-        for (int i = 2; i <= sqrtn; ++i) {
-            if (n % i == 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     MagicalContainer::PrimeIterator &MagicalContainer::PrimeIterator::operator=(const PrimeIterator &other) {
+        if(&container != &other.container) {throw std::runtime_error("Not valid operation - different containers.");}
         if (this != &other) {
             container = other.container;
             currentIndex = other.currentIndex;
@@ -175,15 +198,13 @@ namespace ariel {
     }
 
     MagicalContainer::PrimeIterator &MagicalContainer::PrimeIterator::operator++() {
+        if(currentIndex == container->PrimeSize()) {throw std::runtime_error("Can't increment after end.");}
         ++currentIndex;
-        while (currentIndex < container->size() && !check_prime(container->elements[currentIndex])) {
-            ++currentIndex;
-        }
         return *this;
     }
 
     int MagicalContainer::PrimeIterator::operator*() const {
-        return container->elements.at(currentIndex);
+        return *container->prime_elements.at(currentIndex);
     }
 
     bool MagicalContainer::PrimeIterator::operator==(const PrimeIterator &other) const {
@@ -203,16 +224,12 @@ namespace ariel {
     }
 
     MagicalContainer::PrimeIterator MagicalContainer::PrimeIterator::begin() {
-        PrimeIterator iter (*container);
-        while (iter.currentIndex < container->size() && !check_prime(container->elements.at(iter.currentIndex))){
-            ++iter.currentIndex;
-        }
-        return iter;
+        return PrimeIterator(*container);
     }
 
     MagicalContainer::PrimeIterator MagicalContainer::PrimeIterator::end() {
         PrimeIterator iter(*container);
-        iter.currentIndex = container->elements.size();
+        iter.currentIndex = container->prime_elements.size();
         return iter;    }
 
 }
