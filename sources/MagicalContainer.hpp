@@ -51,10 +51,12 @@ namespace ariel {
                 return currentIndex;
             }
 
+            // Increment index by one.
             void incrementCurrentIndex() {
                 ++currentIndex;
             }
 
+            // Set index.
             void setCurrentIndex(size_t size) {
                 currentIndex = size;
             }
