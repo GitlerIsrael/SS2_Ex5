@@ -1,5 +1,6 @@
 #include "MagicalContainer.hpp"
 #include <stdexcept>
+#include <iostream>
 
 
 using namespace std;
@@ -17,13 +18,8 @@ namespace ariel {
             auto it = std::lower_bound(elements.begin(), elements.end(), element); // Check where o push the new element. O(log n)
             elements.insert(it, element);
 
-            // Clear prime vector and init it again. (did it because elements vector resize its capacity sometimes and realloc new memory for all elements)
-            prime_elements.clear(); // O(n)
-            for(int& elem : elements) { // O(n)
-                if (check_prime(elem)) {
-                    prime_elements.push_back(&elem);
-                }
-            }
+            //         // Re-create prime and side cross vectors. (did it because elements vector resize its capacity sometimes and realloc new memory for all elements)
+            create_pointers_vectors();
         }
     }
 
@@ -35,14 +31,38 @@ namespace ariel {
         }else{
             throw std::runtime_error("Element not exist");
         }
-        // Clear prime vector and init it again. (did it because elements vector resize its capacity sometimes and realloc new memory for all elements)
+
+        // Re-create prime and side cross vectors. (did it because elements vector resize its capacity sometimes and realloc new memory for all elements)
+        create_pointers_vectors();
+    }
+
+
+    void MagicalContainer::create_pointers_vectors() {
+        // Clear prime vector and init it again.
         prime_elements.clear(); // O(n)
         for(int& elem : elements) { // O(n)
             if (check_prime(elem)) {
                 prime_elements.push_back(&elem);
             }
         }
+
+        // Clear sideCross vector and init it again.
+        sideCross_elements.clear();
+        //Manipulate elements vector to create sideCross vector.
+        int index = 0;
+        bool in_first_half_flag = true;
+        while(index != size() / 2) {
+            sideCross_elements.push_back(&elements.at(static_cast<size_t>(index)));
+            if (in_first_half_flag) {
+                index = size() - 1 - index;
+            } else {
+                index = size() - index;
+            }
+            in_first_half_flag = !in_first_half_flag;
+        }
+        sideCross_elements.push_back(&elements.at(static_cast<size_t>(index)));
     }
+
 
     // Return container elements vector size.
     int MagicalContainer::size() const {
@@ -154,22 +174,16 @@ namespace ariel {
     // Copy constructor (use base class - Iterator).
     MagicalContainer::SideCrossIterator::SideCrossIterator(const SideCrossIterator &other) : Iterator(other) {}
 
+    // operator* overriding.
+    int MagicalContainer::SideCrossIterator::operator*() const {
+        return *getContainer()->sideCross_elements.at(getCurrentIndex());
+    }
+
     // Operator++ overriding. (pure virtual in base class).
     MagicalContainer::SideCrossIterator &MagicalContainer::SideCrossIterator::operator++() {
         // Check if not arrived to end of container elements vector.
         if(getCurrentIndex() == getContainer()->size()) {throw std::runtime_error("Can't increment after end.");}
-        //Manipulate elements vector indexes for ++ sideCrossIterator.
-        if(getCurrentIndex() == getContainer()->elements.size() / 2){
-            setCurrentIndex(getContainer()->elements.size());
-        }
-        else if (in_first_half_flag) {
-            setCurrentIndex(static_cast<size_t>(getContainer()->size() - 1) - getCurrentIndex());
-            in_first_half_flag = false;
-        }
-        else if(!in_first_half_flag){
-            setCurrentIndex(static_cast<size_t>(getContainer()->size()) - getCurrentIndex());
-            in_first_half_flag = true;
-        }
+        incrementCurrentIndex(); // Increment index by one.
         return *this;
     }
 

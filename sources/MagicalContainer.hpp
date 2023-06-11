@@ -9,6 +9,7 @@ namespace ariel {
     class MagicalContainer {
     private:
         vector<int> elements;
+        vector<const int*> sideCross_elements;
         vector<const int*> prime_elements;
 
     public:
@@ -23,6 +24,8 @@ namespace ariel {
         int PrimeSize() const;
 
         bool check_prime(int n);
+
+        void create_pointers_vectors();
 
 
         class Iterator {
@@ -102,9 +105,6 @@ namespace ariel {
         };
 
         class SideCrossIterator : public Iterator {
-        private:
-            bool in_first_half_flag = true;
-
         public:
             SideCrossIterator(const MagicalContainer &container);
 
@@ -121,6 +121,8 @@ namespace ariel {
             //
 
             SideCrossIterator &operator++() override;
+
+            int operator*() const override;
 
             SideCrossIterator begin();
 
